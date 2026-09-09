@@ -1,5 +1,5 @@
 ---
-name: create-skills-with-scripts
+name: building-skills-with-scripts
 description: MUST use BEFORE any task that creates, edits, refactors, debugs, reviews, or deletes executable scripts bundled in an agent skill, or wraps one-off uvx/npx commands into a skill.
 ---
 
