@@ -1,6 +1,6 @@
 ---
 name: building-skills-with-scripts
-description: Use when users want to create, edit or optimize a skill that may contain executable scripts.
+description: Use when user wants to create, edit or optimize a skill that may contain executable scripts.
 ---
 
 # Create Skills with Scripts
@@ -25,16 +25,16 @@ description: Use when users want to create, edit or optimize a skill that may co
 
 ### 可发现 Discoverable
 
-在 SKILL.md 设 Scripts 小节，用表格列出每个脚本的命令、用途、示例，路径以技能根目录为基准：
+在 SKILL.md 设 Scripts 小节，用列表列出每个脚本，只写路径与一句话用途，路径以技能根目录为基准：
 
 ```markdown
 ## Scripts
 
-| 命令 | 用途 | 示例 |
-|---|---|---|
-| `scripts/run.sh` | 构建索引（含运行时预检） | `bash scripts/run.sh ./src` |
-| `scripts/query.py` | 查询索引 | `uv run scripts/query.py "keyword" --format json` |
+- `scripts/run.sh` — 构建索引（含运行时预检）
+- `scripts/query.py` — 查询索引
 ```
+
+详细用法与示例不在此重复，由 `--help` 承载（见下）；SKILL.md 正文仅在特定场景需要说明时引用个别示例。Scripts 小节的职责是让 Agent 知道「有哪些脚本、各自做什么」，而非教会用法。
 
 `--help` 是 Agent 了解脚本的第一入口（失败后也会先跑它），必须覆盖用法、参数与可直接运行的示例，同时保持精简——它也占用 Agent 的上下文窗口：
 
@@ -139,20 +139,39 @@ Agent 调用脚本时 cwd 是用户项目目录且随场景变化，脚本不能
 
 | 路径类型 | 约定 |
 |---|---|
-| 脚本自有资源（同目录模板、配置） | 用 `Path(__file__).parent` 定位 |
+| 脚本自有资源（同目录模板、配置） | Python 用 `Path(__file__).resolve().parent`（`resolve()` 解析符号链接）；Bash 用 `BASH_SOURCE` + `pwd -P`，范例见「语言与运行时」 |
 | 操作目标（用户项目的文件） | 由参数显式传入；尽早 resolve 为绝对路径，在输出与报错中回显 |
 | 调用侧 | SKILL.md 中的路径以技能根目录为基准书写；Agent 调用时解析为绝对路径（技能目录位置因安装方式而异） |
 
 可以提供「默认操作 cwd」的便利（`black .` 式惯例），但必须在输出中回显实际操作的绝对路径。
 
+Bash 脚本定位自身目录的两条纪律（范例见「语言与运行时」）：
+
+- 不做错误静默（`>/dev/null 2>&1`）：cd 失败时命令替换非零退出，`set -e` 立即终止；静默只会让空 `SCRIPT_DIR` 在下游报出误导性错误，违反 fail-fast。
+- 不简化成 `$(dirname "$0")`：`$0` 在脚本被 source 时指向父 shell；相对路径在脚本中途 `cd` 后失效；经符号链接调用时会定位到链接所在目录而非脚本真实目录。
+
+若技能能保证脚本只被直接执行、不经符号链接，可省略 readlink 循环，保留 `SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"`。
+
 ## 语言与运行时
 
-业务逻辑一律用 Python 编写。Bash 只承担 launcher 角色：预检运行时 → 缺失则引导安装 → `exec` 委托。它填补 PEP 723 的自举缺口——uv 缺失时报错发生在 shell 层，Python 脚本没有机会自检：
+业务逻辑一律用 Python 编写。Bash 只承担 launcher 角色：预检运行时 → 缺失则引导安装 → `exec` 委托。它填补 PEP 723 的自举缺口——uv 缺失时报错发生在 shell 层，Python 脚本没有机会自检。
+
+脚本内的所有文本——注释、`--help`、错误信息——一律用英文：脚本会被分享给不同的 Agent 与用户环境，英文是唯一无编码风险、无受众假设的选择。
 
 ```bash
 #!/usr/bin/env bash
 # scripts/run.sh — preflight + delegate; no business logic here
 set -euo pipefail
+
+# locate the script's real directory:
+# BASH_SOURCE is source-safe, the readlink loop resolves file symlinks, pwd -P resolves directory symlinks
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd "$(dirname "$SOURCE")" && pwd -P)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd "$(dirname "$SOURCE")" && pwd -P)"
 
 if ! command -v uv >/dev/null 2>&1; then
   cat >&2 <<'EOF'
@@ -163,10 +182,10 @@ EOF
   exit 1
 fi
 
-exec uv run "$(dirname "$0")/main.py" "$@"
+exec uv run "$SCRIPT_DIR/main.py" "$@"
 ```
 
-这个范例同时示范了三段式错误、脚本相对路径定位（`$(dirname "$0")`）与参数转发（`"$@"`）。
+这个范例同时示范了三段式错误、目录定位与参数转发（`"$@"`）；目录定位的细则见「路径约定」。
 
 ## 验证仪式
 
