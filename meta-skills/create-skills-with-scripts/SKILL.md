@@ -1,6 +1,6 @@
 ---
 name: create-skills-with-scripts
-description: Engineering conventions for creating skills that bundle executable scripts or commands. Use when adding scripts/ to a skill, writing or improving skill scripts, or wrapping one-off uvx/npx commands.
+description: MUST use BEFORE any task that creates, edits, refactors, debugs, reviews, or deletes executable scripts bundled in an agent skill, or wraps one-off uvx/npx commands into a skill.
 ---
 
 # Create Skills with Scripts
