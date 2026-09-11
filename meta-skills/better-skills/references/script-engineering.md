@@ -1,11 +1,6 @@
----
-name: building-skills-with-scripts
-description: Use when user wants to create, edit or optimize a skill that may contain executable scripts.
----
+# 技能脚本工程规范
 
-# Create Skills with Scripts
-
-为「带可执行脚本/命令的技能」编写脚本时遵循本规范；通用技能解剖（frontmatter、触发词、progressive disclosure、迭代流程）遵循 skill-creator，本文不重复。
+为「带可执行脚本/命令的技能」编写脚本时遵循本规范；技能层面的通用规范（description、结构、红线）见上级 `SKILL.md`，本文不重复。
 
 **脚本的第一用户是 Agent，不是人**：Agent 读 `--help` 了解用法、解析 stdout 获取结果、依据 stderr 与退出状态决策、失败后重试、受 token 预算约束。本规范所有细则都是这一事实的推论。
 
