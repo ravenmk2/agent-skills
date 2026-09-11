@@ -1,6 +1,6 @@
 ---
 name: better-skills
-description: Use when creating, editing, reviewing, or optimizing a skill or SKILL.md, when the skill may contain executable scripts, when verifying a newly drafted or generated skill.
+description: Best practices for agent skills. Use when user wants to create, edit, review, or optimize a skill or SKILL.md, when verifying a newly drafted or generated skill.
 ---
 
 # Better Skills
