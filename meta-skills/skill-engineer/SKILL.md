@@ -1,9 +1,9 @@
 ---
-name: better-skills
-description: Best practices for agent skills. Use when user wants to create, edit, review, or optimize a skill or SKILL.md, when verifying a newly drafted or generated skill.
+name: skill-engineer
+description: Skill engineering best practices for agent skills. Use when the user wants to create, edit, review, or optimize a skill or SKILL.md, or when discussing, exploring or researching agent skills.
 ---
 
-# Better Skills
+# Skill Engineering
 
 编写与审查 Agent 技能时的最佳实践与红线。
 
