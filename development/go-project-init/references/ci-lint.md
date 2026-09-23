@@ -62,7 +62,7 @@ name: Test
 
 on:
   push:
-    branches: [main]
+    branches: [main, master, develop, dev]
   pull_request:
   workflow_dispatch:
 
@@ -99,6 +99,7 @@ jobs:
       - run: go test ./...
 ```
 
+- push 触发显式列出主干分支（main / master / develop / dev）而非放开所有分支：覆盖默认分支仍为 master 的存量仓库、以及直接 push develop/dev 主干的工作流，同时避免与 `pull_request` 重复触发导致同一次提交双跑；feature 分支的验证统一走 PR
 - 平台矩阵默认三系统（ubuntu / windows / macos），**由具体项目按需裁剪**——例如只支持特定系统的工具可只保留对应平台
 - 存在 `web/` 目录（embed 场景）时，lint 与 test 两个 job 在编译前都需创建 `web/dist` 占位文件（golangci-lint 同样会做类型检查），步骤见 `web-embed.md`
 - test job 固定 `CGO_ENABLED=0`：**测你所发**——release 产物为纯 Go 构建（见 `release.md`），CI 即验证同一配置；矩阵行为因此一致（否则各 runner 是否预装 C 工具链会决定走哪个 SQLite 驱动，行为差异表象为平台问题、根因是驱动不同），同时省去 mattn 的 C 编译耗时与 gcc 依赖。CGO 驱动路径由本地开发自然覆盖；启用 CGO release 变体的项目再按需增加专门的 CGO 测试 job（驱动取舍见 `cgo-sqlite.md`）
