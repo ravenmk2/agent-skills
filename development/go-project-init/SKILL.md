@@ -38,7 +38,9 @@ project/
 ├── web/                   # 前端源码（embed 场景，服务端应用可选）
 ├── scripts/
 │   └── build.sh           # 本地多平台构建脚本
-├── .github/workflows/     # GitHub Actions
+├── .github/workflows/
+│   ├── test.yml           # CI（lint + test）
+│   └── release.yml        # release 流程（仅 CLI/Server 形态）
 ├── .gitignore
 ├── .gitattributes         # Git 文件属性（行尾、二进制、diff 等）
 ├── .ignore                # ripgrep 等检索工具的忽略规则
@@ -48,7 +50,7 @@ project/
 ├── AGENTS.md              # 面向 AI 编码助手的项目说明
 ├── go.mod
 ├── go.sum
-├── LICENSE                # 许可证（GitHub 据此探测，README 徽章依赖）
+├── LICENSE                # 许可证（GitHub 据此探测，README 徽章依赖）；类型是用户决策点，创建前确认
 ├── Makefile               # 可选的便捷封装，非必需入口
 └── README.md
 ```
@@ -118,25 +120,27 @@ project/
 
 面向 AI 编码助手的项目说明，保持最小：标题固定、一句话项目说明、目录结构、文档索引。
 
-```markdown
+````markdown
 # AI Agents 工作规范
 
 <一句话项目说明：这个项目是什么、做什么>
 
 ## 目录结构
 
+```txt
 project/
 ├── cmd/<appname>/   # 程序入口
 ├── internal/        # 应用私有代码
 ├── web/             # 前端源码与构建产物
 └── scripts/         # 辅助脚本
+```
 
 ## 文档索引
 
 文档变化时同步更新
 
 - <其他文档路径>：<一句话说明>
-```
+````
 
 ## README 徽章
 
@@ -197,7 +201,7 @@ CLI/Server: Test → Release → License
 
 - **CGO 基线**：开发、测试、发布一律 `CGO_ENABLED=0` 纯 Go 构建，保持全平台交叉编译能力与静态二进制可移植性；CGO 是显式 opt-in（SQLite 场景见 `references/cgo-sqlite.md`）
 - **版本注入**：统一 `-ldflags "-s -w -X main.version=<ver>"`，代码中 `var version = "dev"` 兜底；release 取 git tag 去 `v` 前缀，本地构建用 `git describe --tags --always --dirty`
-- **工具版本固定**：golangci-lint 固定小版本（如 `v2.5`）、goreleaser 固定大版本（`~> v2`），不用 latest
+- **工具版本固定**：golangci-lint 固定小版本（如 `v2.13`，示例会过期，取当前最新）、goreleaser 固定大版本（`~> v2`），不用 latest；golangci-lint 版本与 Go 版本存在耦合硬约束，见 `references/ci-lint.md`
 - **CI Go 版本**：用 `go-version-file: go.mod` 从 `go.mod` 读取，不在 workflow 中硬编码
 - **release 统一走 goreleaser**：tag `v*.*.*` 触发；changelog 从 Conventional Commits 生成，不在仓库内维护 CHANGELOG.md
 

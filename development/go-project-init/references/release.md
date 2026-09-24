@@ -5,6 +5,8 @@
 
 release 构建统一使用 [goreleaser](https://goreleaser.com/)：多平台多架构交叉编译、归档、checksums、changelog 开箱即用，声明式配置维护成本低。
 
+> **注意**：release 是两件套——`.goreleaser.yml`（构建配置）+ `.github/workflows/release.yml`（触发入口），只落其一则打 tag 后无任何反应。
+
 ## goreleaser 配置
 
 ```yaml
@@ -94,15 +96,15 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
 
-      - uses: goreleaser/goreleaser-action@v6
+      - uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           version: "~> v2"
@@ -188,10 +190,10 @@ permissions:
 在 release job 的 steps 中、goreleaser 步骤之前追加：
 
 ```yaml
-      - uses: docker/setup-qemu-action@v3       # 注册 binfmt，支持 arm64 镜像构建
-      - uses: docker/setup-buildx-action@v3     # dockers 的 use: buildx 的前提
+      - uses: docker/setup-qemu-action@v4       # 注册 binfmt，支持 arm64 镜像构建
+      - uses: docker/setup-buildx-action@v4     # dockers 的 use: buildx 的前提
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

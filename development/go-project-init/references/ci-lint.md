@@ -35,7 +35,8 @@ formatters:
 ### 集成方式
 
 - **CI**：lint 作为 job 并入 Test Workflow（配置见下文 GitHub Actions 一节），与 test job 并行，不单独建 Workflow 文件
-- **版本**：CI 中固定小版本（如 `v2.5`），升级由人主动进行，不用 latest
+- **版本**：CI 中固定小版本（如 `v2.13`，示例会过期，取 [golangci-lint releases](https://github.com/golangci/golangci-lint/releases) 当前最新小版本），升级由人主动进行，不用 latest
+- **版本耦合硬约束**：golangci-lint 的**构建 Go 版本必须 ≥ `go.mod` 的目标 Go 版本**，否则 lint job 直接失败（旧版工具链无法解析新版语言特性与标准库 API）。升级 Go 工具链（`go.mod` 的 `go` 指令）时必须同步检查并升级 CI 固定的 lint 版本，两者作为一次变更提交
 - **本地**：Makefile 提供 `lint` 目标：
 
 ```makefile
@@ -70,15 +71,15 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
 
-      - uses: golangci/golangci-lint-action@v8
+      - uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.5
+          version: v2.13
 
   test:
     strategy:
@@ -88,9 +89,9 @@ jobs:
     env:
       CGO_ENABLED: 0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
 
